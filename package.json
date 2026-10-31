@@ -1,0 +1,20 @@
+{
+  "name": "kyber-chain",
+  "version": "1.0.0",
+  "description": "Kyber Chain ($KYBER): private money for the quantum era. Ring signatures, stealth addresses, hidden amounts, ML-KEM payment detection.",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node _studio/e2e.js"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "@noble/curves": "^1.4.2",
+    "@noble/hashes": "^1.4.0",
+    "@noble/post-quantum": "^0.2.1"
+  }
+}

@@ -1,0 +1,63 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kyber Chain · private money for the quantum era</title>
+<meta name="description" content="Kyber Chain ($KYBER): a private proof-of-work chain. Ring signatures, stealth addresses, hidden amounts, and ML-KEM-768 payment detection that a quantum computer cannot break.">
+<meta property="og:title" content="Kyber Chain · private money for the quantum era"><meta property="og:image" content="/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/style.css">
+<style>.hero{padding:96px 0 84px}.hero .k{color:var(--dim);font-size:13px;margin-bottom:28px}.live{margin-top:44px}#rain{position:absolute;inset:0;z-index:-1;opacity:.5;pointer-events:none}.hero{position:relative;overflow:hidden}</style></head><body>
+<main>
+<section class="hero"><canvas id="rain"></canvas><div class="wrap">
+  <div class="k">kyber <span class="ac">_</span> private money for the quantum era</div>
+  <h1>Private today.<br>Private after <span class="ac">quantum.</span><span class="cursor"></span></h1>
+  <p class="lead">Kyber Chain is a private proof-of-work chain. Every spend hides in a ring of 16, every payment lands at a one-time address, every amount is a sealed commitment. Quantum addresses already detect payments with ML-KEM-768.</p>
+  <div class="row" style="margin-top:32px"><a class="btn" href="/wallet">open wallet →</a><a class="btn gh" href="/explorer">explorer</a><div class="ca" id="ca"></div></div>
+  <div class="stats live"><div><span>HEIGHT</span><b id="sH">…</b></div><div><span>PRIVATE TXS</span><b id="sT">…</b></div><div><span>KEY IMAGES</span><b id="sK">…</b></div><div><span>QUANTUM OUTPUTS</span><b id="sQ" class="q">…</b></div></div>
+</div></section>
+
+<section id="faraday"><div class="wrap">
+  <h2>faraday · the quantum upgrade</h2>
+  <h3>One chain, built to outlive elliptic curves.</h3>
+  <p class="lead" style="margin-top:8px">Faraday is the Kyber upgrade path. Payment detection is already post-quantum on <span class="q">kybq1</span> addresses. Next, spends move to hash-based proofs and every spend hides in the whole chain.</p>
+  <div class="feat" style="margin-top:34px">
+    <div><i>01 · live</i><b>Post-quantum payment detection</b><p>Quantum addresses carry an ML-KEM-768 key. Senders encapsulate to it, so only the receiver can find and open the payment. A quantum computer cannot.</p></div>
+    <div><i>02 · faraday</i><b>Full-chain privacy</b><p>Today a spend hides among 16 outputs. After Faraday it hides among every output on the chain.</p></div>
+    <div><i>03 · faraday</i><b>Post-quantum spends</b><p>Ring signatures move from elliptic curves to hash-based proofs, so nobody can forge a spend with a quantum computer.</p></div>
+    <div><i>04 · live</i><b>Memory-hard mining</b><p>Argon2id proof of work. Memory-hard, so ordinary CPUs stay competitive and ASIC farms gain less.</p></div>
+    <div><i>05 · live</i><b>Wallet in your browser</b><p>Keys are made and kept on your device. Your browser scans the chain, builds the ring signature and range proofs, then submits.</p></div>
+    <div><i>06 · faraday</i><b>Same chain, no lost funds</b><p>No new coin, no relaunch. Your wallet moves your coins to the new format once, and it does the work for you.</p></div>
+  </div>
+  <div class="tbl" style="margin-top:34px"><table><tr><th></th><th>today</th><th>faraday</th></tr>
+    <tr><td>spend proof</td><td>MLSAG ring signature</td><td class="ac">hash-based proof</td></tr>
+    <tr><td>anonymity set</td><td>16 outputs</td><td class="ac">full chain</td></tr>
+    <tr><td>payment detection</td><td>ECDH or <span class="q">ML-KEM-768</span></td><td class="ac">ML-KEM-768 only</td></tr>
+    <tr><td>quantum safety</td><td>receive side</td><td class="ac">send + receive</td></tr>
+    <tr><td>proof of work</td><td>Argon2id</td><td class="ac">Argon2id, lighter verify</td></tr></table></div>
+</div></section>
+
+<section><div class="wrap"><h2>roadmap</h2>
+  <div class="tl"><div class="on"><b>testnet live</b><span>Private PoW chain, explorer, browser wallet, faucet, ML-KEM quantum addresses.</span></div>
+  <div class="on"><b>$KYBER launch</b><span>The token launches on pump.fun and carries the project to mainnet.</span></div>
+  <div><b>open mining</b><span>A standalone miner so anyone can mine testnet blocks with Argon2id.</span></div>
+  <div><b>faraday</b><span>Hash-based spend proofs and full-chain anonymity. Design, testing, review.</span></div>
+  <div><b>mainnet</b><span>Genesis of the main chain with Faraday on from block 1.</span></div></div>
+</div></section>
+
+<section><div class="wrap grid2">
+  <div><h2># privacy today</h2><div class="tbl"><table><tr><td>sender</td><td>ring of 16 (15 decoys)</td></tr><tr><td>receiver</td><td>one-time stealth addresses</td></tr><tr><td>amount</td><td>Pedersen commitments + 48-bit range proofs</td></tr><tr><td>double spend</td><td>linkable key images</td></tr><tr><td>quantum receive</td><td class="q">ML-KEM-768</td></tr></table></div></div>
+  <div><h2># protocol</h2><div class="tbl"><table><tr><td>algorithm</td><td id="pPow">Argon2id</td></tr><tr><td>block time</td><td id="pBt">30 s target</td></tr><tr><td>supply</td><td>~100M + 2.0/block tail</td></tr><tr><td>signatures</td><td>MLSAG over ristretto255</td></tr><tr><td>hashing</td><td>SHA-512, SHA3-256</td></tr></table></div></div>
+</div></section>
+
+<section><div class="wrap"><h2># get started</h2>
+  <div class="grid2"><div class="panel"><div class="hd">browser wallet</div><div style="padding:18px"><p class="dim" style="margin-bottom:16px">Create a wallet, take 25 tKYBER from the faucet and send a private transaction in under a minute.</p><a class="btn" href="/wallet">open wallet →</a></div></div>
+  <div class="panel"><div class="hd">run the node</div><div style="padding:18px"><pre style="color:var(--ac2);font-size:12px;margin-bottom:16px">git clone https://github.com/PumpLandSOL/kyber
+cd kyber && npm i && npm start</pre><a class="btn gh" href="/docs">read the docs</a></div></div></div>
+  <p class="note">Kyber Chain runs as a public testnet. tKYBER has no value. $KYBER is the Solana token that carries the project to mainnet.</p>
+</div></section>
+</main>
+<script type="module">
+import { chrome, caBar, $, api } from '/common.js'; chrome();
+const tick = async () => { const s = await api('/api/stats'); $('sH').textContent = s.height.toLocaleString(); $('sT').textContent = s.privateTxs.toLocaleString(); $('sK').textContent = s.keyImages.toLocaleString(); $('sQ').textContent = s.quantumOutputs.toLocaleString(); $('pPow').textContent = s.pow; $('pBt').textContent = s.targetTime + ' s target'; caBar($('ca'), s.mint); };
+tick(); setInterval(tick, 8000);
+// hex rain: commitments falling past, faded
+const c = $('rain'), g = c.getContext('2d'); let W, H, cols; const fit = () => { W = c.width = c.offsetWidth; H = c.height = c.offsetHeight; cols = Array.from({ length: Math.ceil(W / 16) }, () => Math.random() * H); }; fit(); addEventListener('resize', fit);
+setInterval(() => { g.fillStyle = 'rgba(4,7,10,.18)'; g.fillRect(0, 0, W, H); g.font = '13px JetBrains Mono, monospace'; cols.forEach((y, i) => { g.fillStyle = Math.random() < .03 ? '#b4f2ff' : 'rgba(92,225,255,.35)'; g.fillText('0123456789abcdef'[Math.floor(Math.random() * 16)], i * 16, y); cols[i] = y > H + Math.random() * 4000 ? 0 : y + 16; }); }, 70);
+</script></body></html>
