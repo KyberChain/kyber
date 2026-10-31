@@ -1,5 +1,5 @@
 // shared header/footer, CA bar, toasts, formatting
-export const X_URL = 'https://x.com/KyberChain', GH_URL = 'https://github.com/PumpLandSOL/kyber';
+export const X_URL = 'https://x.com/KyberChain', GH_URL = 'https://github.com/KyberChain/kyber';
 export const $ = (id) => document.getElementById(id), api = (p, d) => fetch(p, d ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(d) } : undefined).then((r) => r.json());
 export const kyb = (v) => (Number(v) / 1e6).toLocaleString('en-US', { maximumFractionDigits: 6 });
 export const short = (h, n = 8) => (h ? h.slice(0, n) + '…' + h.slice(-6) : '');
