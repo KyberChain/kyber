@@ -21,7 +21,7 @@ if (!S.seeds) S.seeds = Array.from({ length: 7 }, () => K.wallet().seed);
 const W = S.seeds.map((s) => K.wallet(s)), MINER = W[0], BOTS = W.slice(1);
 const NAMES = ['miner', 'nyx', 'umbra', 'vesper', 'halcyon', 'ghostline', 'cipher'];
 let mempool = [], saveT = 0;
-const save = () => { if (saveT) return; saveT = setTimeout(() => { saveT = 0; fs.writeFileSync(DATA + '.tmp', JSON.stringify(S)); fs.renameSync(DATA + '.tmp', DATA); }, 1500); };
+const save = () => { if (saveT) return; saveT = setTimeout(() => { saveT = 0; try { fs.mkdirSync(path.dirname(DATA), { recursive: true }); fs.writeFileSync(DATA + '.tmp', JSON.stringify(S)); fs.renameSync(DATA + '.tmp', DATA); } catch (e) { console.error('save failed (' + DATA + '): ' + e.message); } }, 1500); };
 const tip = () => S.blocks[S.blocks.length - 1], height = () => S.blocks.length - 1;
 const getOut = (g) => S.outs[g] && { P: S.outs[g].P, C: S.outs[g].C };
 const spent = (ki) => !!S.kis[ki] || mempool.some((t) => t.vin.some((v) => v.ki === ki));
