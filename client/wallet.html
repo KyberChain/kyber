@@ -1,26 +1,26 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Kyber Wallet</title><link rel="icon" href="/favicon.svg"><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/style.css">
+<title>Kyber Wallet</title><link rel="icon" href="/favicon.svg"><link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Geist+Mono:wght@400&display=swap" rel="stylesheet"><link rel="stylesheet" href="/style.css">
 <script type="importmap">{"imports":{
   "@noble/curves/ed25519":"/vendor/curves/esm/ed25519.js",
   "@noble/hashes/_assert":"/vendor/hashes/esm/_assert.js","@noble/hashes/hmac":"/vendor/hashes/esm/hmac.js","@noble/hashes/sha2":"/vendor/hashes/esm/sha2.js",
   "@noble/hashes/sha3":"/vendor/hashes/esm/sha3.js","@noble/hashes/sha512":"/vendor/hashes/esm/sha512.js","@noble/hashes/utils":"/vendor/hashes/esm/utils.js",
   "@noble/hashes/crypto":"/vendor/hashes/esm/crypto.js","@noble/hashes/sha256":"/vendor/hashes/esm/sha256.js","@noble/hashes/blake2s":"/vendor/hashes/esm/blake2s.js",
   "@noble/post-quantum/ml-kem":"/vendor/post-quantum/esm/ml-kem.js"}}</script>
-<style>.bal{font-size:44px;font-weight:700;letter-spacing:-.02em}.addr{display:flex;gap:10px;align-items:center;border:1px solid var(--line2);padding:10px 12px;cursor:pointer;margin-top:8px;font-size:12px}.addr code{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+<style>.bal{font:500 52px/1 var(--display);font-stretch:112%;letter-spacing:-.02em}.addr{display:flex;gap:10px;align-items:center;border:1px solid var(--line2);padding:10px 12px;cursor:pointer;margin-top:8px;font-size:12px}.addr code{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
 .addr:hover{border-color:var(--ac)}.prog{font-size:12px;color:var(--ac);min-height:18px;margin-top:10px}</style></head><body>
-<main class="wrap" style="padding:40px 20px">
+<main class="wrap app"><div class="pagehead"><h1>Wallet</h1><span class="cap">keys stay in this browser</span></div>
   <div id="setup" hidden><h3>Kyber wallet</h3><p class="dim" style="margin-bottom:22px">Keys are made in this browser and never leave it. Back up the seed: it is the only way to restore the wallet.</p>
-    <div class="row"><button class="btn" id="mk">create wallet</button></div><label>or restore from a 64-character seed</label><div class="row"><input id="seedIn" style="flex:1" placeholder="seed"><button class="btn gh" id="rs">restore</button></div></div>
+    <div class="row"><button class="btn solid" id="mk">create wallet</button></div><label>or restore from a 64-character seed</label><div class="row"><input id="seedIn" style="flex:1" placeholder="seed"><button class="btn gh" id="rs">restore</button></div></div>
   <div id="app" hidden>
     <div class="grid2"><div class="panel"><div class="hd"><span>balance</span><span id="sync" class="dim">syncing…</span></div><div style="padding:18px">
       <div class="bal"><span id="bal">0</span> <span class="dim" style="font-size:16px">tKYBER</span></div><div class="dim" id="pend" style="font-size:12px"></div>
-      <div class="row" style="margin-top:18px"><button class="btn" id="drip">faucet · 25 tKYBER</button><button class="btn gh" id="rescan">rescan</button></div></div></div>
+      <div class="row" style="margin-top:18px"><button class="btn solid" id="drip">faucet · 25 tKYBER</button><button class="btn gh" id="rescan">rescan</button></div></div></div>
     <div class="panel"><div class="hd"><span>receive</span><span>share either address</span></div><div style="padding:18px">
       <label style="margin-top:0">classic address <span class="tag">ECDH</span></label><div class="addr" id="a1"><code></code><span class="ac">copy</span></div>
       <label>quantum address <span class="tag q">ML-KEM-768</span></label><div class="addr" id="a2"><code class="q"></code><span class="ac">copy</span></div>
       <p class="dim" style="font-size:12px;margin-top:10px">Payments to the quantum address are detected with ML-KEM-768 and stay private against a quantum computer.</p></div></div></div>
     <div class="panel" style="margin-top:18px"><div class="hd"><span>send privately</span><span>fee 0.01 tKYBER · ring 16</span></div><div style="padding:18px">
-      <label style="margin-top:0">to (kyb1… or kybq1…)</label><textarea id="to" rows="2"></textarea><label>amount</label><div class="row"><input id="amt" type="number" min="0" step="0.000001" style="flex:1" placeholder="0.0"><button class="btn gh" id="max">max</button><button class="btn" id="send">send</button></div>
+      <label style="margin-top:0">to (kyb1… or kybq1…)</label><textarea id="to" rows="2"></textarea><label>amount</label><div class="row"><input id="amt" type="number" min="0" step="0.000001" style="flex:1" placeholder="0.0"><button class="btn gh" id="max">max</button><button class="btn solid" id="send">send</button></div>
       <div class="prog" id="prog"></div></div></div>
     <div class="panel" style="margin-top:18px"><div class="hd"><span>your outputs</span><span>only this wallet can see these</span></div><div class="list" id="outs"></div></div>
     <div class="panel" style="margin-top:18px"><div class="hd"><span>seed</span><span class="bad">anyone with this controls the coins</span></div><div style="padding:18px" class="row"><button class="btn gh" id="showSeed">show seed</button><button class="btn gh" id="forget">forget wallet</button><code id="seed" style="word-break:break-all;flex:1"></code></div></div>

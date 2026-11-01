@@ -1,9 +1,9 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Kyber Explorer</title><link rel="icon" href="/favicon.svg"><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/style.css">
+<title>Kyber Explorer</title><link rel="icon" href="/favicon.svg"><link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Geist+Mono:wght@400&display=swap" rel="stylesheet"><link rel="stylesheet" href="/style.css">
 <style>.srch{display:flex;gap:10px;margin:34px 0 22px}.srch input{flex:1}.kv td:first-child{width:170px}.ring{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:8px}.ring a{border:1px solid var(--line2);padding:6px;text-align:center;font-size:12px}.ring a:hover{border-color:var(--ac)}
 @media(max-width:760px){.ring{grid-template-columns:repeat(4,1fr)}}</style></head><body>
-<main class="wrap" style="padding-bottom:40px">
-  <form class="srch" id="sf"><input id="q" placeholder="block height, block hash, tx id or key image" autocomplete="off"><button class="btn">search</button></form>
+<main class="wrap app"><div class="pagehead"><h1>Explorer</h1><span class="cap">kyber testnet · every transaction private</span></div>
+  <form class="srch" id="sf" style="margin:0 0 22px"><input id="q" placeholder="block height, block hash, tx id or key image" autocomplete="off"><button class="btn solid">search</button></form>
   <div id="view"></div>
 </main>
 <script type="module">
