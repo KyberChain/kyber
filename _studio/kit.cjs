@@ -3,30 +3,30 @@
 const fs = require('fs'), path = require('path'), { open, sleep } = require('./cdp.cjs');
 const OUT = path.join(__dirname, '..', 'brand'), SRC = path.join(__dirname, 'kit'); fs.mkdirSync(SRC, { recursive: true }); fs.mkdirSync(OUT, { recursive: true });
 const url = (f) => 'file:///' + f.split(path.sep).join('/');
-const C = { bg: '#0b0b0b', bg2: '#121211', line: 'rgba(232,228,220,.16)', line2: 'rgba(232,228,220,.4)', tx: '#e8e4dc', dim: '#9a968f', dim2: '#5b5955', ac: '#ffffff', ac2: '#e8e4dc', q: '#ffffff', head: '#d4d0c8' };
+const C = { bg: '#0b0b0b', bg2: '#121211', line: 'rgba(237,237,237,.14)', line2: 'rgba(237,237,237,.36)', tx: '#ededed', dim: '#8e8e8e', dim2: '#5b5955', ac: '#ff3131', ac2: '#ededed', q: '#ff3131', head: '#dcdcdc' };
 // the dotted K, same as the site
-const MARK = (s = 1) => `<svg width="${32 * s}" height="${32 * s}" viewBox="0 0 24 24" fill="#e8e4dc">${[[5, 3], [5, 6], [5, 9], [5, 12], [5, 15], [5, 18], [5, 21], [8, 12], [11, 9], [14, 6], [17, 3], [11, 15], [14, 18], [17, 21]].map(([x, y]) => `<rect x="${x - 1.2}" y="${y - 1.2}" width="2.4" height="2.4"/>`).join('')}<rect x="19" y="10.5" width="3" height="3" fill="#fff"/></svg>`;
+const MARK = (s = 1) => `<svg width="${32 * s}" height="${32 * s}" viewBox="0 0 24 24" fill="#ff3131">${[[5, 3], [5, 6], [5, 9], [5, 12], [5, 15], [5, 18], [5, 21], [8, 12], [11, 9], [14, 6], [17, 3], [11, 15], [14, 18], [17, 21]].map(([x, y]) => `<rect x="${x - 1.2}" y="${y - 1.2}" width="2.4" height="2.4"/>`).join('')}<rect x="19" y="10.5" width="3" height="3" fill="#fff"/></svg>`;
 const HEAD = (W, H) => `<!doctype html><html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Geist+Mono:wght@400&display=swap" rel="stylesheet"><style>
 *{margin:0;padding:0;box-sizing:border-box}body{width:${W}px;height:${H}px;overflow:hidden;position:relative;background:${C.bg};color:${C.tx};font:400 26px/1.45 'Archivo',sans-serif}
-.ac{color:${C.ac}}.dim{color:${C.dim}}.q{color:${C.ac}}.h{font-weight:500;font-stretch:118%;letter-spacing:-.025em;line-height:1.02;color:${C.head}}.h .ac{color:#fff}
+.ac{color:${C.ac}}.dim{color:${C.dim}}.q{color:${C.ac}}.h{font-weight:500;font-stretch:118%;letter-spacing:-.025em;line-height:1.02;color:${C.head}}.h .ac{color:#ff3131}
 .eb{display:flex;align-items:center;gap:16px;font:400 17px 'Geist Mono',monospace;letter-spacing:.2em;text-transform:uppercase;color:${C.dim}}.eb:after{content:'';flex:1;height:1px;background:${C.line};min-width:120px}.eb b{color:${C.tx};font-weight:400}
-.cur{display:inline-block;width:.5em;height:.9em;background:${C.tx};vertical-align:-.08em;margin-left:8px}
+.cur{display:inline-block;width:.5em;height:.9em;background:${C.ac};vertical-align:-.08em;margin-left:8px}
 .grid{display:none}
-.tbl{position:relative;border:1px solid ${C.line};background:${C.bg2};font-family:'Geist Mono',monospace}.tbl:before,.tbl:after{content:'';position:absolute;width:12px;height:12px;border:1.5px solid #fff}.tbl:before{top:-1px;left:-1px;border-right:0;border-bottom:0}.tbl:after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+.tbl{position:relative;border:1px solid ${C.line};background:${C.bg2};font-family:'Geist Mono',monospace}.tbl:before,.tbl:after{content:'';position:absolute;width:12px;height:12px;border:1.5px solid #ff3131}.tbl:before{top:-1px;left:-1px;border-right:0;border-bottom:0}.tbl:after{bottom:-1px;right:-1px;border-left:0;border-top:0}
 .tbl .r{display:grid;padding:16px 22px;border-bottom:1px solid ${C.line}}.tbl .r:last-child{border-bottom:0}.tbl .r>.dim{font-size:.8em;letter-spacing:.1em;text-transform:uppercase}.tbl p{font-family:Archivo,sans-serif}
-.tag{font:400 15px 'Geist Mono',monospace;letter-spacing:.12em;text-transform:uppercase;border:1px solid ${C.line2};color:${C.dim};padding:4px 12px;border-radius:999px}.tag.q{border-color:${C.tx};color:${C.tx}}
+.tag{font:400 15px 'Geist Mono',monospace;letter-spacing:.12em;text-transform:uppercase;border:1px solid ${C.line2};color:${C.dim};padding:4px 12px;border-radius:999px}.tag.q{border-color:${C.ac};color:${C.ac}}
 .foot{position:absolute;left:80px;right:80px;bottom:50px;display:flex;justify-content:space-between;align-items:center;font:400 17px 'Geist Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:${C.dim}}.foot b{color:${C.tx};display:flex;gap:12px;align-items:center;font:600 20px 'Archivo';font-stretch:118%;letter-spacing:.04em}
 </style></head><body>`;
 const FOOT = () => `<div class="foot"><b>${MARK(1.1)}<span>KYBER <span style="font:400 13px 'Geist Mono';letter-spacing:.2em;color:${C.dim}">CHAIN</span></span></b><span>@KyberChainL1 · $KYBER</span></div>`;
 // speckled blobs, like the site hero: dots scattered inside soft circles (deterministic)
 const RAIN = (W, H, n = 220, op = 0.35, seed = 7) => { let s = seed; const r = () => (s = (s * 16807) % 2147483647) / 2147483647; const blobs = Array.from({ length: Math.max(3, Math.round(n / 45)) }, () => ({ x: r() * W, y: r() * H, R: 60 + r() * Math.min(W, H) * 0.22 }));
   let o = ''; for (const b of blobs) { const cnt = Math.round(b.R * b.R / 90 * (op / 0.3)); for (let i = 0; i < cnt; i++) { const a = r() * 6.283, d = Math.sqrt(r()) * b.R * (0.75 + 0.25 * Math.sin(a * 3 + b.x)); o += `<rect x="${(b.x + Math.cos(a) * d).toFixed(1)}" y="${(b.y + Math.sin(a) * d).toFixed(1)}" width="2" height="2" opacity="${(0.45 + r() * 0.55).toFixed(2)}"/>`; } }
-  return `<svg width="${W}" height="${H}" style="position:absolute;inset:0" fill="#e8e4dc">${o}</svg>`; };
+  return `<svg width="${W}" height="${H}" style="position:absolute;inset:0" fill="#ff3131">${o}</svg>`; };
 const RING = (cx, cy, R, real = -1, sz = 26) => Array.from({ length: 16 }, (_, i) => { const a = (i / 16) * Math.PI * 2 - Math.PI / 2, x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R;
   return `<div style="position:absolute;left:${x - sz / 2}px;top:${y - sz / 2}px;width:${sz}px;height:${sz}px;border-radius:50%;border:2px solid ${i === real ? C.ac : C.line2};background:${i === real ? C.ac : C.bg2};box-shadow:none"></div>`; }).join('');
 
 const G = {
-  'kyber-pfp': [1000, 1000, () => HEAD(1000, 1000) + RAIN(1000, 1000, 260, 0.22) + `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 50%,rgba(232,228,220,.07),transparent 60%)">${MARK(17)}</div></body></html>`],
+  'kyber-pfp': [1000, 1000, () => HEAD(1000, 1000) + RAIN(1000, 1000, 260, 0.22) + `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 50%,rgba(255,49,49,.08),transparent 60%)">${MARK(17)}</div></body></html>`],
   'kyber-banner': [1500, 500, () => HEAD(1500, 500) + `<div class="grid"></div>` + RAIN(1500, 500, 160, 0.25) + `<div style="position:absolute;left:520px;top:120px"><div class="eb">private money for the quantum era</div><div class="h" style="font-size:66px;margin-top:18px">Private today.<br>Private after <span class="ac">quantum.</span><span class="cur"></span></div>
     <div style="display:flex;gap:12px;margin-top:26px">${['ring of 16', 'stealth addresses', 'hidden amounts', 'ML-KEM-768'].map((t, i) => `<span class="tag ${i === 3 ? 'q' : ''}">${t}</span>`).join('')}</div></div></body></html>`],
   'kyber-keyart': [1600, 900, () => HEAD(1600, 900) + `<div class="grid"></div>` + RAIN(1600, 900, 300, 0.3) + `<div style="position:absolute;left:80px;top:90px"><div class="eb">testnet live</div><div class="h" style="font-size:118px;margin-top:26px">Private today.<br>Private after<br><span class="ac">quantum.</span><span class="cur"></span></div></div>
