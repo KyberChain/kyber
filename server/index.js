@@ -6,6 +6,7 @@
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path'; import crypto from 'node:crypto'; import { fileURLToPath } from 'node:url';
 import * as K from '../client/rct.js';
 
+if (typeof crypto.argon2 !== "function") { console.error(`Kyber Chain needs Node 24+ (Argon2id). This is Node ${process.version}. Set NODE_VERSION=24 on the host.`); process.exit(1); }
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..'), CLIENT = path.join(ROOT, 'client');
 const PORT = +process.env.PORT || 8266, DATA = process.env.DATA_PATH || path.join(ROOT, 'data.json');
 const BLOCK_SEC = +process.env.BLOCK_SEC || 30, ARGON_KIB = +process.env.ARGON_KIB || 8192, MIN_FEE = 10_000n;
