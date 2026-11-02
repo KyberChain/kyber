@@ -92,7 +92,7 @@ section{position:relative;padding:clamp(80px,10vw,140px) 0}
 <section id="payments"><div class="sheet">
   <div class="labels reveal"><span>how</span><i></i><span>a</span><i></i><span>payment</span><i></i><span>works</span></div>
   <h2 class="disp gap-h reveal">On chain, a payment is a gap.</h2>
-  <p class="lead reveal">A Kyber transaction proves that value moved without saying who sent it, who received it, or how much. This is what a wallet does to make one, and what the chain keeps. <b>The panel shows the latest private transaction on the live testnet.</b></p>
+  <p class="lead reveal">A Kyber transaction proves that value moved without saying who sent it, who received it, or how much. Open any transaction in the explorer and press <b>verify in your browser</b> to check the proof yourself. This is what a wallet does to make one, and what the chain keeps. <b>The panel shows the latest private transaction on the live testnet.</b></p>
   <div class="pay">
     <div class="frame onchain reveal"><div class="row" style="justify-content:space-between;margin-bottom:6px"><span class="cap">on chain</span><a class="pbtn" id="txlink" style="padding:5px 10px" href="/explorer">live</a></div><div id="oc"></div>
       <div class="cap" style="margin-top:22px">never on chain</div><div class="chips"><span>sender</span><span>receiver</span><span>amount</span><span>which output was spent</span></div></div>
@@ -146,7 +146,7 @@ section{position:relative;padding:clamp(80px,10vw,140px) 0}
   <div class="labels reveal"><span>things</span><i></i><span>people</span><i></i><span>keep</span><i></i><span>asking</span></div>
   <div class="spread reveal"><span class="disp">Questions.</span><span class="disp">Answers.</span></div>
   <div class="faq">
-    <div class="reveal"><h5>Is the testnet actually private?</h5><p>Yes. Every transaction on the live testnet uses a real ring of 16, real one-time addresses, real Pedersen commitments with range proofs and, for kybq1 addresses, real ML-KEM-768. Open the explorer: there are no senders, receivers or amounts to read.</p></div>
+    <div class="reveal"><h5>Is the testnet actually private?</h5><p>Yes. Every transaction on the live testnet uses a real ring of 16, real one-time addresses, real Pedersen commitments with range proofs and, for kybq1 addresses, real ML-KEM-768. Open the explorer: there are no senders, receivers or amounts to read. Every transaction has a <b>verify in your browser</b> button that re-checks its ring signatures, range proofs and balance on your own machine, and the code and test suite are public on GitHub.</p></div>
     <div class="reveal"><h5>Why keep ring signatures if they use elliptic curves?</h5><p>They are fast and well studied today. A quantum computer that could break them does not exist yet, but recorded receivers and amounts are the part that leaks backwards in time, so Kyber seals those with ML-KEM first. Faraday replaces the ring with hash-based proofs.</p></div>
     <div class="reveal"><h5>Where are my keys?</h5><p>In your browser. The wallet creates a 32-byte seed on your device and derives the spend key, view key and ML-KEM key from it. The node never sees them. Back up the seed.</p></div>
     <div class="reveal"><h5>What is the difference between tKYBER and $KYBER?</h5><p>tKYBER is the testnet coin from the faucet and has no value. $KYBER is the Solana token that funds the work and carries the project to mainnet.</p></div>
