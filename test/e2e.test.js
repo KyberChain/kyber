@@ -1,5 +1,5 @@
-// End-to-end against a running node, doing exactly what the browser wallet does.
-//   PORT=8267 BLOCK_SEC=6 DATA_PATH=/tmp/k.json node server/index.js   then   API=http://localhost:8267 node _studio/e2e.js
+// End-to-end against a running node, doing exactly what the browser wallet does. `npm run test:e2e` boots its own node.
+//   API=http://localhost:8267 node test/e2e.test.js   (against a node you started yourself)
 import * as K from '../client/rct.js';
 const B = process.env.API || 'http://localhost:8267';
 const get = (p) => fetch(B + p).then((r) => r.json()), post = (p, d) => fetch(B + p, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(d) }).then((r) => r.json());

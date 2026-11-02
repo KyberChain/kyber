@@ -1,0 +1,16 @@
+name: tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - name: Crypto unit tests (ring signatures, range proofs, ML-KEM, double spends)
+        run: npm test
+      - name: End-to-end (boots a node, mines, faucet, private send to a quantum address)
+        run: npm run test:e2e
+        timeout-minutes: 15
