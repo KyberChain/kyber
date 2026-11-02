@@ -92,7 +92,7 @@ Zcash: privacy is opt-in
 Monero: private by default, curves underneath
 NOID: hash-based ownership proofs, nothing shielded
 
-Kyber: private by default, ML-KEM-768 quantum receive, hash-based spends at Faraday.
+Kyber: private by default, ML-KEM-768 quantum receive, hash-based spends next.
 
 $KYBER`],
   ['Launch (fill CA)', 'kyber-keyart.png', `$KYBER is live.
