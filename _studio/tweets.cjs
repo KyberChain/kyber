@@ -86,6 +86,15 @@ $KYBER`],
 3. Send to any kyb1 or kybq1 address
 
 Your browser builds the ring signature. The chain sees nothing.`],
+  ['Vs private chains', 'kyber-g08-vs-privacy.png', `Kyber vs the private chains:
+
+Zcash: privacy is opt-in
+Monero: private by default, curves underneath
+NOID: hash-based ownership proofs, nothing shielded
+
+Kyber: private by default, ML-KEM-768 quantum receive, hash-based spends at Faraday.
+
+$KYBER`],
   ['Launch (fill CA)', 'kyber-keyart.png', `$KYBER is live.
 
 Kyber Chain: private money for the quantum era. Ring signatures, stealth addresses, hidden amounts, ML-KEM-768.

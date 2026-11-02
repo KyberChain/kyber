@@ -147,7 +147,20 @@ Try a private transaction in under a minute:
 Your browser builds the ring signature. The chain sees nothing.
 ```
 
-### 12. Launch (fill CA) · 144 chars · media: `kyber-keyart.png`
+### 12. Vs private chains · 246 chars · media: `kyber-g08-vs-privacy.png`
+```
+Kyber vs the private chains:
+
+Zcash: privacy is opt-in
+Monero: private by default, curves underneath
+NOID: hash-based ownership proofs, nothing shielded
+
+Kyber: private by default, ML-KEM-768 quantum receive, hash-based spends at Faraday.
+
+$KYBER
+```
+
+### 13. Launch (fill CA) · 144 chars · media: `kyber-keyart.png`
 ```
 $KYBER is live.
 
