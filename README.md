@@ -62,6 +62,7 @@ Both run on every push in GitHub Actions.
 ```
 GET  /api/work?address=A           block template paying the coinbase to A (Argon2id params + header)
 POST /api/work   {id, nonce}        submit a solved nonce; the node re-hashes it before accepting
+GET  /api/leaderboard[?address=A]   genesis leaderboard: public blocks per miner (address fingerprint), your rank
 GET  /api/stats                     height, difficulty, outputs, key images, emission
 GET  /api/blocks?limit=15&before=N  recent blocks
 GET  /api/block/:height|:hash       one block and its transactions

@@ -95,7 +95,13 @@ async function submitWork(id, nonce) { const j = jobs2.get('#' + id); if (!j) th
   nonce = Math.floor(+nonce); if (!Number.isFinite(nonce) || nonce < 0) throw new Error('bad nonce');
   const pow = await powHash(j.T.hdr, nonce); if (!meets(pow, j.T.b.diff)) throw new Error('hash does not meet difficulty');
   if (j.T.b.height !== S.blocks.length) throw new Error('stale: block was found while checking');
-  accept(j.T, nonce, pow, 'public'); jobs2.delete('#' + id); jobs2.delete(j.addr.slice(0, 120)); S.pub = (S.pub || 0) + 1; return j.T.b.height; }
+  accept(j.T, nonce, pow, 'public'); jobs2.delete('#' + id); jobs2.delete(j.addr.slice(0, 120)); S.pub = (S.pub || 0) + 1;
+  // genesis leaderboard: blocks per payout address, listed by a short fingerprint so the address itself is never published
+  const fp = minerId(j.addr), e = (S.board ||= {})[fp] ||= { blocks: 0, first: j.T.b.height, firstTs: now() }; e.blocks++; e.last = j.T.b.height; e.lastTs = now(); save();
+  return j.T.b.height; }
+const minerId = (addr) => crypto.createHash('sha256').update('kyber-miner|' + addr).digest('hex').slice(0, 16);
+function board() { const rows = Object.entries(S.board || {}).map(([id, e]) => ({ id, ...e })).sort((a, b) => b.blocks - a.blocks || a.first - b.first);
+  return { miners: rows.length, blocks: rows.reduce((a, r) => a + r.blocks, 0), top: rows.slice(0, 100).map((r, i) => ({ rank: i + 1, ...r })) }; }
 // keep full signatures/proofs for recent blocks; older txs keep what wallets and explorers need
 function prune() { const cut = height() - 3000; if (cut <= 0) return; for (const id of S.blocks[cut].txs || []) { const t = S.txs[id]; if (t && t.vin && !t.pruned) { t.vin.forEach((v) => { delete v.sig; }); t.vout.forEach((o) => delete o.rp); t.pruned = true; } } }
 
@@ -158,6 +164,7 @@ http.createServer(async (req, res) => {
     if (p === '/api/work' && req.method === 'POST') { const d = await body(req); if (now() - (hits.get(ip + 'wf') || 0) < 500) return json(res, 200, { error: 'slow down after a bad share' });   // only failed shares are throttled
       try { return json(res, 200, { ok: true, height: await submitWork(d.id, d.nonce) }); } catch (e) { const m = String(e.message || e); if (/difficulty|bad nonce/.test(m)) hits.set(ip + 'wf', now()); return json(res, 200, { error: m }); } }
     if (p === '/vendor-hw/argon2.umd.min.js') { res.writeHead(200, { 'content-type': 'text/javascript', 'cache-control': 'public, max-age=86400' }); return fs.createReadStream(path.join(ROOT, 'node_modules', 'hash-wasm', 'dist', 'argon2.umd.min.js')).pipe(res); }
+    if (p === '/api/leaderboard') { const b = board(), a = u.searchParams.get('address'); if (a) { try { K.parseAddress(a); const id = minerId(a), all = Object.entries(S.board || {}).sort((x, y) => y[1].blocks - x[1].blocks || x[1].first - y[1].first), k = all.findIndex(([i]) => i === id); b.you = { id, rank: k >= 0 ? k + 1 : null, ...(S.board?.[id] || { blocks: 0 }) }; } catch {} } return json(res, 200, b); }
     if (p === '/api/miners') return json(res, 200, W.map((w, k) => ({ name: NAMES[k], address: w.address, outputs: owned[k].length })));
     // static
     if (p.startsWith('/vendor/')) { const f = path.join(ROOT, 'node_modules', '@noble', path.normalize(p.slice(8)).replace(/^(\.\.[\\/])+/, '')); if (!f.startsWith(path.join(ROOT, 'node_modules')) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }

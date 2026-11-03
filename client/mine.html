@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Kyber Mining</title><meta name="description" content="Mine Kyber Chain in your browser or from the command line. Argon2id proof of work, rewards paid to your own private address."><link rel="icon" href="/favicon.svg"><link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Geist+Mono:wght@400&display=swap" rel="stylesheet"><link rel="stylesheet" href="/style.css">
-<style>.big{font:500 44px var(--display);font-stretch:112%}#log div{padding:9px 18px;border-bottom:1px solid var(--line);font:400 12px var(--mono)}input[type=range]{width:160px;accent-color:#ff3131}</style>
+<style>.big{font:500 44px var(--display);font-stretch:112%}#lb div{display:grid;grid-template-columns:60px 1fr 120px 160px;padding:9px 18px;border-top:1px solid var(--line);font:400 12px var(--mono)}#lb div.me{color:#ff3131}#log div{padding:9px 18px;border-bottom:1px solid var(--line);font:400 12px var(--mono)}input[type=range]{width:160px;accent-color:#ff3131}</style>
 <script type="importmap">{"imports":{
   "@noble/curves/ed25519":"/vendor/curves/esm/ed25519.js",
   "@noble/hashes/_assert":"/vendor/hashes/esm/_assert.js","@noble/hashes/hmac":"/vendor/hashes/esm/hmac.js","@noble/hashes/sha2":"/vendor/hashes/esm/sha2.js",
@@ -18,6 +18,9 @@
   <div class="panel" style="margin-top:18px"><div class="hd"><span>command-line miner</span><span>all cores · node 24+</span></div><div style="padding:18px">
     <pre style="margin:0">git clone https://github.com/KyberChain/kyber && cd kyber
 node miner/miner.js YOUR_KYB1_ADDRESS --threads 8</pre><p class="dim" style="font-size:12px;margin-top:12px">The miner fetches work from <code>GET /api/work?address=…</code> and submits solutions to <code>POST /api/work</code>. The node re-checks every hash before it accepts a block. Point <code>--node</code> at your own node to mine against it.</p></div></div>
+  <div class="panel" style="margin-top:18px"><div class="hd"><span>genesis leaderboard</span><span id="lbs">testnet miners</span></div>
+    <p class="dim" style="font-size:12px;padding:14px 18px 0">Every block a public miner finds is recorded against their payout address. Testnet miners on this board are rewarded at mainnet genesis. Addresses are shown as a fingerprint, never in full.</p>
+    <div id="you" style="padding:10px 18px 0;font:400 12px var(--mono)"></div><div id="lb" style="margin-top:10px"></div></div>
   <div class="panel" style="margin-top:18px"><div class="hd"><span>activity</span><span>this session</span></div><div id="log"><div class="dim">not mining yet</div></div></div>
 </main>
 <script type="module">
@@ -31,10 +34,15 @@ async function work() { const j = await api('/api/work?address=' + encodeURIComp
 function spawn(n) { while (W.length < n) { const w = new Worker('/mine-worker.js'), k = W.length; w.onmessage = (e) => onMsg(k, e.data); if (job) w.postMessage({ job }); if (run) w.postMessage({ run: true }); W.push(w); }
   while (W.length > n) { W.pop().terminate(); delete rate[W.length]; } }
 async function onMsg(k, d) { if (d.hashes != null) { rate[k] = d.hashes; $('hr').textContent = Object.values(rate).reduce((a, b) => a + b, 0) + ' H/s'; }
-  if (d.found) { const r = await api('/api/work', d.found); if (r.ok) { found++; $('mine').textContent = found; log(`<span class="ac">★ block ${r.height} found</span> · reward paid to your address`); toast('block ' + r.height + ' found'); } else if (!/stale|expired/.test(r.error)) log('<span class="dim">' + r.error + '</span>'); job = null; work(); } }
+  if (d.found) { const r = await api('/api/work', d.found); if (r.ok) { found++; $('mine').textContent = found; board(); log(`<span class="ac">★ block ${r.height} found</span> · reward paid to your address`); toast('block ' + r.height + ' found'); } else if (!/stale|expired/.test(r.error)) log('<span class="dim">' + r.error + '</span>'); job = null; work(); } }
 async function start() { try { K.parseAddress($('addr').value.trim()); } catch { return toast('paste a kyb1 or kybq1 address first', 1); }
   run = true; spawn(+$('th').value); await work(); W.forEach((w) => w.postMessage({ run: true })); poll = setInterval(work, 5000); $('go').textContent = 'stop mining'; $('st').innerHTML = '<span class="ac">mining</span>'; log('started with ' + W.length + ' threads'); }
 function stop() { run = false; W.forEach((w) => w.postMessage({ run: false })); clearInterval(poll); rate = {}; $('hr').textContent = '0 H/s'; $('go').textContent = 'start mining'; $('st').textContent = 'stopped'; }
 $('go').onclick = () => (run ? stop() : start()); $('th').oninput = () => { $('tn').textContent = $('th').value; if (run) spawn(+$('th').value); };
+async function board() { const a = $('addr').value.trim(), b = await api('/api/leaderboard' + (a ? '?address=' + encodeURIComponent(a) : ''));
+  $('lbs').textContent = b.miners + ' miners · ' + b.blocks + ' blocks';
+  $('you').innerHTML = b.you ? (b.you.blocks ? '<span class="ac">you: rank #' + b.you.rank + ' · ' + b.you.blocks + ' blocks</span> · id ' + b.you.id : '<span class="dim">you: no blocks yet · id ' + b.you.id + '</span>') : '';
+  $('lb').innerHTML = '<div class="dim"><span>rank</span><span>miner</span><span>blocks</span><span>first block</span></div>' + (b.top.length ? b.top.slice(0, 25).map((r) => '<div class="' + (b.you && r.id === b.you.id ? 'me' : '') + '"><span>#' + r.rank + '</span><span>' + r.id + '</span><span>' + r.blocks + '</span><span>' + r.first + '</span></div>').join('') : '<div class="dim"><span></span><span>be the first public miner</span></div>'); }
+board(); setInterval(board, 15000); $('addr').onchange = board;
 api('/api/stats').then((s) => { $('ht').textContent = s.height + ' · ' + s.diff; $('rw').textContent = kyb(s.reward); });
 </script></body></html>
