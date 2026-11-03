@@ -141,6 +141,7 @@ http.createServer(async (req, res) => {
   } catch (e) { json(res, 500, { error: String(e) }); }
 }).listen(PORT, () => { console.log(`Kyber Chain on :${PORT} · height ${height()} · outputs ${S.outs.length}`); });
 
-// rebuild wallet views from stored outputs, then run
-for (let g = 0; g < S.outs.length; g++) scanOut(g);
-mine(); bots();
+// rebuild wallet views from stored outputs in small batches so the API answers during a long rescan, then run
+let rescan = 0;
+(function step() { const end = Math.min(rescan + 200, S.outs.length); for (; rescan < end; rescan++) scanOut(rescan);
+  if (rescan < S.outs.length) return setImmediate(step); console.log(`wallets rescanned · ${S.outs.length} outputs`); mine(); bots(); })();
