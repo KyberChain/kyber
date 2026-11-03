@@ -106,7 +106,7 @@ $KYBER is the Solana token that funds development and carries the community to m
 
 ## Links
 
-- Testnet, explorer and wallet: https://kyber-e1ev.onrender.com
-- Docs: https://kyber-e1ev.onrender.com/docs
+- Testnet, explorer and wallet: https://kyberchain.org
+- Docs: https://kyberchain.org/docs
 - Code: https://github.com/KyberChain/kyber
 - X: https://x.com/KyberChainL1

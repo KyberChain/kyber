@@ -4,8 +4,8 @@
 
 [![tests](https://github.com/KyberChain/kyber/actions/workflows/test.yml/badge.svg)](https://github.com/KyberChain/kyber/actions/workflows/test.yml)
 
-- Live testnet, explorer and wallet: https://kyber-e1ev.onrender.com
-- Whitepaper: [WHITEPAPER.md](WHITEPAPER.md) · https://kyber-e1ev.onrender.com/whitepaper
+- Live testnet, explorer and wallet: https://kyberchain.org
+- Whitepaper: [WHITEPAPER.md](WHITEPAPER.md) · https://kyberchain.org/whitepaper
 - X: [@KyberChainL1](https://x.com/KyberChainL1)
 - Token: $KYBER on Solana carries the project to mainnet. The testnet coin (tKYBER) has no value.
 
