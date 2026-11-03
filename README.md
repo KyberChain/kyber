@@ -39,6 +39,15 @@ npm start              # http://localhost:8266
 
 Environment: `PORT`, `DATA_PATH` (chain file), `BLOCK_SEC` (target block time, default 30), `ARGON_KIB` (Argon2id memory, default 8192), `KYBER_MINT` (the $KYBER address shown on the site).
 
+## Mine it
+
+```
+node miner/miner.js YOUR_KYB1_OR_KYBQ1_ADDRESS --threads 8     # mines on kyberchain.org
+node miner/miner.js YOUR_ADDRESS --node http://localhost:8266   # or against your own node
+```
+
+Or open https://kyberchain.org/mine and mine in the browser (Argon2id in WebAssembly, one Web Worker per thread). `NODE_PAUSE` (ms) slows the node's own miner to leave more blocks for public miners.
+
 ## Test it
 
 ```bash
@@ -51,6 +60,8 @@ Both run on every push in GitHub Actions.
 ## API
 
 ```
+GET  /api/work?address=A           block template paying the coinbase to A (Argon2id params + header)
+POST /api/work   {id, nonce}        submit a solved nonce; the node re-hashes it before accepting
 GET  /api/stats                     height, difficulty, outputs, key images, emission
 GET  /api/blocks?limit=15&before=N  recent blocks
 GET  /api/block/:height|:hash       one block and its transactions
@@ -80,7 +91,7 @@ POST /api/faucet  {address}         25 tKYBER, once an hour
 ## Status and roadmap
 
 - **Live:** private testnet with everything in the table above.
-- **Next:** a standalone Argon2id miner so anyone can mine testnet blocks.
+- **Live:** open mining. Mine in the browser at https://kyberchain.org/mine or with `node miner/miner.js <address>`; block rewards go to your own private address.
 - **Faraday:** spends move from elliptic-curve ring signatures to hash-based proofs, and each spend hides among every output on the chain. Payment detection becomes ML-KEM-768 only.
 - **Mainnet:** genesis with Faraday on from block 1.
 

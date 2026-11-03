@@ -10,7 +10,7 @@ if (typeof crypto.argon2 !== "function") { console.error(`Kyber Chain needs Node
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..'), CLIENT = path.join(ROOT, 'client');
 const PORT = +process.env.PORT || 8266, DATA = (process.env.DATA_PATH || path.join(ROOT, 'data.json')).replace(/.json$/, '') + '-r2.json';   // r2: testnet reset 2026-11-02
 const BLOCK_SEC = +process.env.BLOCK_SEC || 30, ARGON_KIB = +process.env.ARGON_KIB || 8192, MIN_FEE = 10_000n;
-const KYBER_MINT = process.env.KYBER_MINT || '';                         // $KYBER on Solana, shown on the site once set
+const KYBER_MINT = process.env.KYBER_MINT || '', NODE_PAUSE = +process.env.NODE_PAUSE || 0;   // ms the node's own miner rests between hashes, leaving room for public miners                         // $KYBER on Solana, shown on the site once set
 const FAUCET = 25n * K.UNIT, MATURITY = 3, SUPPLY = 100_000_000n * K.UNIT, TAIL = 2n * K.UNIT;
 const now = () => Date.now(), big = (x) => BigInt(x), fmt = (v) => (Number(v) / 1e6).toLocaleString('en-US', { maximumFractionDigits: 6 });
 
@@ -55,25 +55,47 @@ function nextDiff() { const n = S.blocks.length; if (n < 3) return 6; const t = 
 const powHash = (hdr, nonce) => new Promise((ok, no) => crypto.argon2('argon2id', { message: Buffer.from(hdr + '|' + nonce), nonce: Buffer.from('kyber-chain-pow!'), parallelism: 1, tagLength: 32, memory: ARGON_KIB, passes: 1 }, (e, h) => e ? no(e) : ok(h)));
 const meets = (h, diff) => BigInt('0x' + h.toString('hex')) * BigInt(diff) < 2n ** 256n;
 function addOutputs(txid, tx, h, clear) { tx.vout.forEach((o, i) => { const g = S.outs.length; S.outs.push({ P: o.P, C: o.C, amt: o.amt, ...(o.ct ? { ct: o.ct } : {}), ...(clear ? { clear: true } : {}), R: tx.R, i, h, txid }); scanOut(g); }); }
+// a block template paying the coinbase to `addr` (any kyb1/kybq1 address); public miners and the node's own miner both use it
+function template(addr) {
+  const txs = mempool.slice(0, 20), fees = txs.reduce((a, t) => a + big(t.fee), 0n), h = S.blocks.length, r = K.rand();
+  // genesis pays 64 small outputs across the wallets so the first rings of 16 have members to hide among
+  const pay = h === 0 ? Array.from({ length: 64 }, (_, i) => [W[i % W.length].address, reward() / 64n]) : [[addr, reward() + fees]];
+  const cb = { v: 1, coinbase: true, height: h, R: K.ph(K.G.multiply(r)), vout: pay.map(([a, v], i) => K.makeOutput(a, v, i, r, true).o) };
+  const ids = [K.txhash(cb), ...txs.map((t) => K.txhash(t))];
+  const b = { height: h, prev: h ? tip().hash : '0'.repeat(64), ts: now(), diff: nextDiff(), root: K.txhash(ids), minerTx: ids[0] };
+  return { b, cb, txs, ids, fees, hdr: header(b) };
+}
+function accept(T, nonce, pow, by) {
+  const { b, cb, txs, ids, fees, hdr } = T, h = b.height;
+  b.nonce = nonce; b.pow = pow.toString('hex'); b.hash = K.txhash(hdr + '|' + nonce); b.txs = ids; b.size = JSON.stringify(txs).length + 400; b.reward = String(reward()); b.fees = String(fees); b.by = by;
+  const live = txs.filter((t) => t.vin.every((v) => !S.kis[v.ki]));
+  S.txs[ids[0]] = { ...cb, h, ts: b.ts }; addOutputs(ids[0], cb, h, true);
+  for (const t of live) { const id = K.txhash(t); S.txs[id] = { ...t, h, ts: b.ts }; t.vin.forEach((v) => (S.kis[v.ki] = id)); addOutputs(id, t, h, false); }
+  S.emitted = String(big(S.emitted) + reward()); S.blocks.push(b); mempool = mempool.filter((t) => !txs.includes(t)); prune(); save();
+  console.log(`block ${h} diff ${b.diff} by ${by} txs ${live.length}`);
+}
 async function mine() {
   for (;;) {
-    const txs = mempool.slice(0, 20), fees = txs.reduce((a, t) => a + big(t.fee), 0n), h = S.blocks.length, r = K.rand();
-    // genesis pays 64 small outputs across the wallets so the first rings of 16 have members to hide among
-    const pay = h === 0 ? Array.from({ length: 64 }, (_, i) => [W[i % W.length].address, reward() / 64n]) : [[MINER.address, reward() + fees]];
-    const cb = { v: 1, coinbase: true, height: h, R: K.ph(K.G.multiply(r)), vout: pay.map(([a, v], i) => K.makeOutput(a, v, i, r, true).o) };
-    const ids = [K.txhash(cb), ...txs.map((t) => K.txhash(t))];
-    const b = { height: h, prev: h ? tip().hash : '0'.repeat(64), ts: now(), diff: nextDiff(), root: K.txhash(ids), minerTx: ids[0] };
-    const hdr = header(b); let nonce = Math.floor(Math.random() * 1e9), hashes = 0, pow;
-    for (;;) { pow = await powHash(hdr, nonce); hashes++; if (meets(pow, b.diff)) break; nonce++; if (S.blocks.length !== h) break; }
+    const T = template(MINER.address), h = T.b.height; let nonce = Math.floor(Math.random() * 1e9), pow;
+    for (;;) { pow = await powHash(T.hdr, nonce); if (meets(pow, T.b.diff)) break; nonce++; if (S.blocks.length !== h) break;
+      if (NODE_PAUSE) await new Promise((ok) => setTimeout(ok, NODE_PAUSE)); }
     if (S.blocks.length !== h) continue;
-    b.nonce = nonce; b.pow = pow.toString('hex'); b.hash = K.txhash(hdr + '|' + nonce); b.txs = ids; b.size = JSON.stringify(txs).length + 400; b.reward = String(reward()); b.fees = String(fees);
-    const live = txs.filter((t) => t.vin.every((v) => !S.kis[v.ki]));
-    S.txs[ids[0]] = { ...cb, h, ts: b.ts }; addOutputs(ids[0], cb, h, true);
-    for (const t of live) { const id = K.txhash(t); S.txs[id] = { ...t, h, ts: b.ts }; t.vin.forEach((v) => (S.kis[v.ki] = id)); addOutputs(id, t, h, false); }
-    S.emitted = String(big(S.emitted) + reward()); S.blocks.push(b); mempool = mempool.filter((t) => !txs.includes(t)); prune(); save();
-    console.log(`block ${h} diff ${b.diff} hashes ${hashes} txs ${live.length}`);
+    accept(T, nonce, pow, 'node');
   }
 }
+// ---------- open mining: anyone fetches a template for their own address, solves Argon2id, submits the nonce ----------
+const jobs2 = new Map(); let jobN = 0;
+function getWork(addr) { K.parseAddress(addr); const key = addr.slice(0, 120), hit = jobs2.get(key);
+  if (hit && hit.T.b.height === S.blocks.length && now() - hit.at < 20_000) return hit;
+  const T = template(addr), j = { id: String(++jobN), T, at: now(), addr }; jobs2.set(key, j); jobs2.set('#' + j.id, j);
+  if (jobs2.size > 4000) for (const [k, v] of jobs2) if (v.T.b.height < S.blocks.length) jobs2.delete(k);
+  return j; }
+async function submitWork(id, nonce) { const j = jobs2.get('#' + id); if (!j) throw new Error('unknown or expired job, fetch new work');
+  if (j.T.b.height !== S.blocks.length) throw new Error('stale: block ' + j.T.b.height + ' was already found');
+  nonce = Math.floor(+nonce); if (!Number.isFinite(nonce) || nonce < 0) throw new Error('bad nonce');
+  const pow = await powHash(j.T.hdr, nonce); if (!meets(pow, j.T.b.diff)) throw new Error('hash does not meet difficulty');
+  if (j.T.b.height !== S.blocks.length) throw new Error('stale: block was found while checking');
+  accept(j.T, nonce, pow, 'public'); jobs2.delete('#' + id); jobs2.delete(j.addr.slice(0, 120)); S.pub = (S.pub || 0) + 1; return j.T.b.height; }
 // keep full signatures/proofs for recent blocks; older txs keep what wallets and explorers need
 function prune() { const cut = height() - 3000; if (cut <= 0) return; for (const id of S.blocks[cut].txs || []) { const t = S.txs[id]; if (t && t.vin && !t.pruned) { t.vin.forEach((v) => { delete v.sig; }); t.vout.forEach((o) => delete o.rp); t.pruned = true; } } }
 
@@ -91,19 +113,19 @@ async function submit(tx) { if (mempool.length > 200) throw 'mempool full'; if (
 
 // ---------- views ----------
 const txSummary = (id) => { const t = S.txs[id]; if (!t) return null; return { id, h: t.h, ts: t.ts, coinbase: !!t.coinbase, ins: t.vin ? t.vin.length : 0, outs: t.vout.length, fee: t.fee || '0', quantum: t.vout.filter((o) => o.ct).length, amount: t.coinbase ? t.vout[0].amt : null }; };
-const blockView = (b) => ({ height: b.height, hash: b.hash, prev: b.prev, ts: b.ts, diff: b.diff, nonce: b.nonce, pow: b.pow, size: b.size, reward: b.reward, fees: b.fees, txs: b.txs.length });
+const blockView = (b) => ({ height: b.height, hash: b.hash, prev: b.prev, ts: b.ts, diff: b.diff, nonce: b.nonce, pow: b.pow, size: b.size, reward: b.reward, by: b.by || 'node', fees: b.fees, txs: b.txs.length });
 function stats() { const n = S.blocks.length, last = S.blocks.slice(-20), span = last.length > 1 ? (last[last.length - 1].ts - last[0].ts) / (last.length - 1) / 1000 : BLOCK_SEC;
   const priv = Object.values(S.txs).filter((t) => !t.coinbase), q = priv.reduce((a, t) => a + t.vout.filter((o) => o.ct).length, 0);
   return { name: 'Kyber Chain', ticker: 'KYBER', network: 'testnet', height: n - 1, outputs: S.outs.length, keyImages: Object.keys(S.kis).length, privateTxs: priv.length, quantumOutputs: q, mempool: mempool.length,
     emitted: S.emitted, supply: String(SUPPLY), reward: String(reward()), diff: tip() ? tip().diff : 0, blockTime: +span.toFixed(1), targetTime: BLOCK_SEC, hashrate: tip() ? +(tip().diff / span).toFixed(2) : 0,
-    ring: K.RING, bits: K.BITS, pow: `Argon2id (${ARGON_KIB / 1024} MiB)`, mint: KYBER_MINT || null, faucet: String(FAUCET) }; }
+    ring: K.RING, bits: K.BITS, pow: `Argon2id (${ARGON_KIB / 1024} MiB)`, mint: KYBER_MINT || null, faucet: String(FAUCET), publicBlocks: S.pub || 0 }; }
 function search(q) { q = String(q || '').trim(); if (/^\d+$/.test(q) && S.blocks[+q]) return { type: 'block', id: q };
   if (/^[0-9a-f]{64}$/.test(q)) { if (S.txs[q]) return { type: 'tx', id: q }; const b = S.blocks.find((x) => x.hash === q); if (b) return { type: 'block', id: String(b.height) }; if (S.kis[q]) return { type: 'tx', id: S.kis[q] }; }
   return null; }
 
 // ---------- http ----------
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.json': 'application/json', '.pdf': 'application/pdf' };
-const PAGES = { '/': 'index.html', '/explorer': 'explorer.html', '/wallet': 'wallet.html', '/docs': 'docs.html', '/whitepaper': 'whitepaper.html', '/faraday': 'faraday.html' };
+const PAGES = { '/': 'index.html', '/explorer': 'explorer.html', '/wallet': 'wallet.html', '/docs': 'docs.html', '/whitepaper': 'whitepaper.html', '/mine': 'mine.html', '/faraday': 'faraday.html' };
 const json = (res, code, o) => { res.writeHead(code, { 'content-type': 'application/json', 'access-control-allow-origin': '*', 'cache-control': 'no-store' }); res.end(JSON.stringify(o)); };
 const body = (req) => new Promise((ok) => { let d = ''; req.on('data', (c) => { d += c; if (d.length > 3e6) req.destroy(); }); req.on('end', () => { try { ok(JSON.parse(d || '{}')); } catch { ok({}); } }); });
 const hits = new Map(); const limited = (ip, key, per) => { const k = ip + key, t = hits.get(k) || 0; if (now() - t < per) return true; hits.set(k, now()); return false; };
@@ -131,6 +153,11 @@ http.createServer(async (req, res) => {
     if (p === '/api/faucet' && req.method === 'POST') { const d = await body(req); try { K.parseAddress(d.address); } catch (e) { return json(res, 200, { error: String(e) }); }
       const key = d.address.slice(0, 80); if (limited(ip, 'f', 30 * 60_000) || (S.faucet[key] && now() - S.faucet[key] < 60 * 60_000)) return json(res, 200, { error: 'one faucet drip per hour' });
       try { const id = await submit(await walletSend(0, d.address, FAUCET)); S.faucet[key] = now(); save(); return json(res, 200, { ok: true, id, amount: String(FAUCET) }); } catch (e) { hits.delete(ip + 'f'); return json(res, 200, { error: String(e) }); } }
+    if (p === '/api/work' && req.method === 'GET') { try { const j = getWork(u.searchParams.get('address') || ''); return json(res, 200, { id: j.id, height: j.T.b.height, diff: j.T.b.diff, hdr: j.T.hdr, reward: String(reward() + j.T.fees),
+        argon: { type: 'argon2id', salt: 'kyber-chain-pow!', memoryKiB: ARGON_KIB, iterations: 1, parallelism: 1, hashLength: 32 }, rule: 'argon2id(hdr + "|" + nonce) * diff < 2^256' }); } catch (e) { return json(res, 200, { error: String(e.message || e) }); } }
+    if (p === '/api/work' && req.method === 'POST') { const d = await body(req); if (now() - (hits.get(ip + 'wf') || 0) < 500) return json(res, 200, { error: 'slow down after a bad share' });   // only failed shares are throttled
+      try { return json(res, 200, { ok: true, height: await submitWork(d.id, d.nonce) }); } catch (e) { const m = String(e.message || e); if (/difficulty|bad nonce/.test(m)) hits.set(ip + 'wf', now()); return json(res, 200, { error: m }); } }
+    if (p === '/vendor-hw/argon2.umd.min.js') { res.writeHead(200, { 'content-type': 'text/javascript', 'cache-control': 'public, max-age=86400' }); return fs.createReadStream(path.join(ROOT, 'node_modules', 'hash-wasm', 'dist', 'argon2.umd.min.js')).pipe(res); }
     if (p === '/api/miners') return json(res, 200, W.map((w, k) => ({ name: NAMES[k], address: w.address, outputs: owned[k].length })));
     // static
     if (p.startsWith('/vendor/')) { const f = path.join(ROOT, 'node_modules', '@noble', path.normalize(p.slice(8)).replace(/^(\.\.[\\/])+/, '')); if (!f.startsWith(path.join(ROOT, 'node_modules')) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }

@@ -100,7 +100,7 @@ $KYBER is the Solana token that funds development and carries the community to m
 
 - Done: testnet live with explorer, browser wallet and faucet
 - Done: $KYBER launch
-- Next: open mining with Argon2id
+- Done: open mining with Argon2id (browser miner at /mine, CLI miner in miner/)
 - Next: Faraday, hash-based spends and full-chain privacy
 - Then: mainnet with Faraday from block 1
 

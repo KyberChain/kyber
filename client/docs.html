@@ -29,7 +29,9 @@ kybq1…  quantum: the same keys + an ML-KEM-768 public key (about 1,700 charact
 <p>Faraday is the quantum upgrade. ML-KEM payment detection is live today on <code>kybq1</code> addresses. Two parts are still ahead. Spends move from elliptic-curve ring signatures to hash-based proofs. The anonymity set grows from 16 outputs to the whole chain. Coins move to the new format once, and the wallet does it for you.</p>
 
 <h3>API</h3>
-<pre>GET  /api/stats                     chain height, difficulty, outputs, key images, emission
+<pre>GET  /api/work?address=A            block template paying the coinbase to A
+POST /api/work   {id, nonce}         submit a solved nonce (re-checked by the node)
+GET  /api/stats                     chain height, difficulty, outputs, key images, emission
 GET  /api/blocks?limit=15&before=N  recent blocks
 GET  /api/block/:height|:hash       one block with its transactions
 GET  /api/txs                       mempool + recent private transactions

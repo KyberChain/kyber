@@ -1,4 +1,4 @@
-// Kyber Chain videos (frame-exact): hype, ring, quantum.  node _studio/videos.cjs [hype|ring|quantum]
+// Kyber Chain videos (frame-exact): hype, ring, quantum, why.  node _studio/videos.cjs [hype|ring|quantum|why]
 'use strict';
 const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process'), { open, sleep } = require('./cdp.cjs');
 const B = path.join(__dirname, '..', 'brand'), K = path.join(__dirname, 'kit'), FPS = 30, url = (f) => 'file:///' + f.split(path.sep).join('/');
@@ -61,5 +61,19 @@ async function quantum(c) {
   show('c',t,9.4,12.8);for(let i=0;i<3;i++)$('r'+i).style.opacity=cl((t-9.8-i*.5)/.35);${ENDJS(12.8)}};</script></body></html>`;
   await render(c, 'kyber-quantum-16s', html, 16); }
 
+// 4. why post-quantum: curves secure everything → Shor breaks them → harvest now → NIST → Kyber
+async function why(c) {
+  const CH = [['Bitcoin', 'ECDSA · Schnorr'], ['Ethereum', 'ECDSA'], ['Solana', 'Ed25519'], ['Monero', 'Ed25519 rings']];
+  const html = HEAD + `<div class="s" id="a"><div class="eb">how crypto is secured today</div><div class="h" style="font-size:112px;margin-top:24px">Every major chain<br>runs on <span class="ac">elliptic curves.</span></div></div>
+  <div class="s" id="b"><div>${CH.map(([k, v], i) => `<div class="row" id="c${i}" style="opacity:0;grid-template-columns:380px 560px 300px"><span>${k}</span><span class="dim">${v}</span><span id="x${i}" class="dim">secure</span></div>`).join('')}</div><div id="bl" style="margin-top:50px;font-size:40px;opacity:0">Shor's algorithm on a large quantum computer<br><span class="ac">turns a public key back into a private key.</span></div></div>
+  <div class="s" id="d"><div class="eb">harvest now, break later</div><div class="h" style="font-size:96px;margin-top:24px">Every public key<br>is on-chain <span class="ac">forever.</span></div><div class="dim" style="font-size:36px;margin-top:40px;line-height:1.5">Millions of BTC already sit behind exposed public keys.<br>On a privacy chain, a quantum attacker doesn't just steal. <span style="color:#ededed">It unmasks the history.</span></div></div>
+  <div class="s" id="e"><div class="eb">2024</div><div class="h" style="font-size:96px;margin-top:24px">NIST standardised<br><span class="ac">post-quantum cryptography.</span></div><div class="dim mono" style="font-size:30px;margin-top:40px">FIPS 203 · ML-KEM</div></div>
+  <div class="s" id="f"><div class="eb">kyber chain</div><div style="margin-top:30px">${[['quantum receive', 'ML-KEM-768', 'live'], ['spend proofs', 'hash-based', 'next'], ['anonymity set', 'the full chain', 'next']].map(([a, b, st], i) => `<div class="row" id="r${i}" style="opacity:0;grid-template-columns:420px 520px 160px"><span class="dim">${a}</span><span>${b}</span><span class="${st === 'live' ? 'ac' : 'dim'}">${st}</span></div>`).join('')}</div></div>
+  ${END('Fix it before<br><span class="ac">Q-day.</span><span class="cur"></span>')}
+  <script>${JS}window.__seek=(t)=>{rain(t,t<3.4?.6:.22);show('a',t,0,3.4);show('b',t,3.4,10.4);
+  for(let i=0;i<4;i++){$('c'+i).style.opacity=cl((t-3.8-i*.35)/.35);const br=t>6.6+i*.3;$('x'+i).textContent=br?'vulnerable':'secure';$('x'+i).style.color=br?'#ff3131':'#8e8e8e';}
+  $('bl').style.opacity=cl((t-6.4)/.4);show('d',t,10.4,15.2);show('e',t,15.2,18.6);show('f',t,18.6,22);for(let i=0;i<3;i++)$('r'+i).style.opacity=cl((t-19-i*.45)/.35);${ENDJS(22)}};</script></body></html>`;
+  await render(c, 'kyber-why-pq-26s', html, 26); }
+
 (async () => { const only = process.argv[2]; const c = await open('about:blank', 1920, 1080, 9700 + Math.floor(Math.random() * 90));
-  if (!only || only === 'hype') await hype(c); if (!only || only === 'ring') await ring(c); if (!only || only === 'quantum') await quantum(c); c.close(); process.exit(0); })();
+  if (!only || only === 'hype') await hype(c); if (!only || only === 'ring') await ring(c); if (!only || only === 'quantum') await quantum(c); if (only === 'why') await why(c); c.close(); process.exit(0); })();
