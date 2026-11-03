@@ -8,7 +8,7 @@ import * as K from '../client/rct.js'; import { Worker } from 'node:worker_threa
 
 if (typeof crypto.argon2 !== "function") { console.error(`Kyber Chain needs Node 24+ (Argon2id). This is Node ${process.version}. Set NODE_VERSION=24 on the host.`); process.exit(1); }
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..'), CLIENT = path.join(ROOT, 'client');
-const PORT = +process.env.PORT || 8266, DATA = process.env.DATA_PATH || path.join(ROOT, 'data.json');
+const PORT = +process.env.PORT || 8266, DATA = (process.env.DATA_PATH || path.join(ROOT, 'data.json')).replace(/.json$/, '') + '-r2.json';   // r2: testnet reset 2026-11-02
 const BLOCK_SEC = +process.env.BLOCK_SEC || 30, ARGON_KIB = +process.env.ARGON_KIB || 8192, MIN_FEE = 10_000n;
 const KYBER_MINT = process.env.KYBER_MINT || '';                         // $KYBER on Solana, shown on the site once set
 const FAUCET = 25n * K.UNIT, MATURITY = 3, SUPPLY = 100_000_000n * K.UNIT, TAIL = 2n * K.UNIT;
