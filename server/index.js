@@ -103,7 +103,7 @@ function search(q) { q = String(q || '').trim(); if (/^\d+$/.test(q) && S.blocks
 
 // ---------- http ----------
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.json': 'application/json', '.pdf': 'application/pdf' };
-const PAGES = { '/': 'index.html', '/explorer': 'explorer.html', '/wallet': 'wallet.html', '/docs': 'docs.html', '/faraday': 'faraday.html' };
+const PAGES = { '/': 'index.html', '/explorer': 'explorer.html', '/wallet': 'wallet.html', '/docs': 'docs.html', '/whitepaper': 'whitepaper.html', '/faraday': 'faraday.html' };
 const json = (res, code, o) => { res.writeHead(code, { 'content-type': 'application/json', 'access-control-allow-origin': '*', 'cache-control': 'no-store' }); res.end(JSON.stringify(o)); };
 const body = (req) => new Promise((ok) => { let d = ''; req.on('data', (c) => { d += c; if (d.length > 3e6) req.destroy(); }); req.on('end', () => { try { ok(JSON.parse(d || '{}')); } catch { ok({}); } }); });
 const hits = new Map(); const limited = (ip, key, per) => { const k = ip + key, t = hits.get(k) || 0; if (now() - t < per) return true; hits.set(k, now()); return false; };
